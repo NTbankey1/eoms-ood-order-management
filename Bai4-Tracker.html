@@ -1,0 +1,1046 @@
+<title>Bảng điều khiển Bài 4</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@500;600;700&family=Manrope:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* ---------------------------------------------------------------
+   DESIGN PLAN
+   Direction: bảng vẽ kỹ thuật — giấy canh cool-grey, mực graphite,
+   một màu cobalt duy nhất cho tương tác; mã công việc (T1.4, NR-3, S13)
+   đặt trong mono như chú thích bản vẽ.
+   Palette : --bg / --surface / --ink / --line / --accent + 5 màu người
+   Type    : Be Vietnam Pro (tiêu đề, Việt) · Manrope (thân, Việt)
+             IBM Plex Mono (mã & số liệu)
+   Layout  : header dính + dải tab + panel; bảng rộng tự cuộn
+   --------------------------------------------------------------- */
+:root{
+  --bg:#F5F6F9; --surface:#FFFFFF; --surface-2:#EDEFF4; --surface-3:#E4E8EF;
+  --ink:#14161C; --ink-2:#545B6B; --ink-3:#858C9C;
+  --line:#DBDFE8; --line-2:#E9ECF2;
+  --accent:#2A46C8; --accent-ink:#FFFFFF; --accent-soft:#E5E9FB;
+  --ok:#1B7350; --ok-soft:#DFF1E7;
+  --warn:#8A5906; --warn-soft:#FAEFD9;
+  --danger:#AC2318; --danger-soft:#FAE5E3;
+  --p-vong:#2A46C8; --p-bao:#0E7C6B; --p-tin:#6D3FA6; --p-khoa:#9B2D7A; --p-khang:#A6521E;
+  --shadow:0 1px 2px rgba(20,22,28,.06), 0 4px 12px rgba(20,22,28,.05);
+  --r:10px; --r-sm:6px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0D0F14; --surface:#151822; --surface-2:#1B1F2B; --surface-3:#232836;
+    --ink:#E9EBF1; --ink-2:#A4ABBC; --ink-3:#767D8E;
+    --line:#272C39; --line-2:#1F242F;
+    --accent:#8FA4FF; --accent-ink:#0D0F14; --accent-soft:#1B2340;
+    --ok:#5FC98F; --ok-soft:#11291D;
+    --warn:#E0AC5A; --warn-soft:#2A2113;
+    --danger:#F08A82; --danger-soft:#2E1512;
+    --p-vong:#8FA4FF; --p-bao:#5BC9B6; --p-tin:#B392E8; --p-khoa:#E58FCB; --p-khang:#E8A176;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 4px 14px rgba(0,0,0,.3);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0D0F14; --surface:#151822; --surface-2:#1B1F2B; --surface-3:#232836;
+  --ink:#E9EBF1; --ink-2:#A4ABBC; --ink-3:#767D8E;
+  --line:#272C39; --line-2:#1F242F;
+  --accent:#8FA4FF; --accent-ink:#0D0F14; --accent-soft:#1B2340;
+  --ok:#5FC98F; --ok-soft:#11291D;
+  --warn:#E0AC5A; --warn-soft:#2A2113;
+  --danger:#F08A82; --danger-soft:#2E1512;
+  --p-vong:#8FA4FF; --p-bao:#5BC9B6; --p-tin:#B392E8; --p-khoa:#E58FCB; --p-khang:#E8A176;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 4px 14px rgba(0,0,0,.3);
+  color-scheme: dark;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:"Manrope",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  font-size:14px; line-height:1.55; -webkit-font-smoothing:antialiased;
+}
+.wrap{padding-inline:16px; padding-block:0 48px; max-width:1180px; margin:0 auto}
+h1,h2,h3,h4{font-family:"Be Vietnam Pro","Manrope",sans-serif; text-wrap:balance; margin:0; line-height:1.25}
+.mono{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace; font-variant-numeric:tabular-nums}
+.num{font-variant-numeric:tabular-nums}
+
+/* ---------- masthead ---------- */
+.masthead{
+  position:sticky; top:env(safe-area-inset-top,0px); z-index:30;
+  background:color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+}
+.masthead-in{max-width:1180px; margin:0 auto; padding-inline:16px; padding-block:10px;
+  display:flex; flex-wrap:wrap; gap:10px 16px; align-items:center}
+.mh-title{display:flex; flex-direction:column; gap:1px; min-width:0; flex:1 1 200px}
+.mh-title h1{font-size:15px; font-weight:700; letter-spacing:-.01em}
+.mh-title p{margin:0; font-size:11.5px; color:var(--ink-2)}
+.mh-prog{display:flex; align-items:center; gap:10px; flex:1 1 220px; min-width:0}
+.mh-bar{flex:1; height:7px; min-width:80px; border-radius:99px; background:var(--surface-3); overflow:hidden; display:flex}
+.mh-bar span{height:100%}
+.mh-pct{font-size:15px; font-weight:600; min-width:44px; text-align:right}
+.mh-actions{display:flex; gap:6px; flex:0 1 auto}
+
+/* ---------- buttons ---------- */
+.btn{
+  font:inherit; font-size:12.5px; font-weight:600; cursor:pointer;
+  background:var(--surface); color:var(--ink);
+  border:1px solid var(--line); border-radius:var(--r-sm);
+  padding:6px 11px; white-space:nowrap;
+  transition:background .12s, border-color .12s;
+}
+.btn:hover{background:var(--surface-2)}
+.btn:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+.btn-primary{background:var(--accent); color:var(--accent-ink); border-color:var(--accent)}
+.btn-primary:hover{background:var(--accent); filter:brightness(1.08)}
+
+/* ---------- tabs ---------- */
+.tabs{position:sticky; top:calc(env(safe-area-inset-top,0px) + var(--mh-h, 54px)); z-index:20;
+  background:var(--bg); border-bottom:1px solid var(--line); margin-bottom:18px}
+.tabs-in{max-width:1180px; margin:0 auto; padding-inline:16px;
+  display:flex; gap:2px; overflow-x:auto; scrollbar-width:none}
+.tabs-in::-webkit-scrollbar{display:none}
+.tab{
+  font:inherit; font-size:13px; font-weight:600; cursor:pointer;
+  background:none; border:0; border-bottom:2px solid transparent;
+  color:var(--ink-2); padding:9px 11px; white-space:nowrap;
+}
+.tab:hover{color:var(--ink)}
+.tab[aria-selected="true"]{color:var(--accent); border-bottom-color:var(--accent)}
+.tab:focus-visible{outline:2px solid var(--accent); outline-offset:-2px; border-radius:4px}
+.tab .cnt{font-size:11px; color:var(--ink-3); margin-left:5px}
+
+/* ---------- panels ---------- */
+.panel[hidden]{display:none}
+.sec{margin-bottom:26px}
+.sec-h{display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; margin-bottom:10px}
+.sec-h h2{font-size:15px; font-weight:700; letter-spacing:-.01em}
+.sec-h .hint{font-size:12px; color:var(--ink-2); margin:0}
+
+/* ---------- tiles ---------- */
+.tiles{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px}
+.tile{background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:12px 13px}
+.tile .k{font-size:11px; font-weight:600; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-3)}
+.tile .v{font-size:23px; font-weight:600; line-height:1.2; margin-top:3px}
+.tile .s{font-size:11.5px; color:var(--ink-2); margin-top:1px}
+.tile.warn{background:var(--warn-soft); border-color:color-mix(in srgb, var(--warn) 30%, transparent)}
+.tile.warn .k{color:var(--warn)}
+
+/* ---------- person rows ---------- */
+.plist{display:flex; flex-direction:column; gap:8px}
+.prow{
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--r);
+  padding:11px 13px; display:grid; gap:4px 14px;
+  grid-template-columns:minmax(150px,1.1fr) minmax(140px,2fr) auto;
+  align-items:center;
+}
+.prow .who{display:flex; align-items:center; gap:8px; min-width:0}
+.dot{width:9px; height:9px; border-radius:99px; flex:none}
+.pname{font-weight:600; font-size:13.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.psub{font-size:11.5px; color:var(--ink-2)}
+.pbar{height:8px; border-radius:99px; background:var(--surface-3); overflow:hidden; display:flex}
+.pbar span{height:100%}
+.pstat{font-size:12px; color:var(--ink-2); text-align:right; white-space:nowrap}
+@media (max-width:620px){
+  .prow{grid-template-columns:1fr; gap:6px}
+  .pstat{text-align:left}
+}
+
+/* ---------- task tree ---------- */
+.grp{background:var(--surface); border:1px solid var(--line); border-radius:var(--r); margin-bottom:10px; overflow:hidden}
+.grp-h{display:flex; align-items:center; gap:9px; padding:10px 13px; background:var(--surface-2); border-bottom:1px solid var(--line-2); flex-wrap:wrap}
+.grp-h .code{font-size:11.5px; font-weight:600; color:var(--ink-2)}
+.grp-h h3{font-size:13.5px; font-weight:600; flex:1 1 auto; min-width:0}
+.grp-h .own{font-size:11.5px; color:var(--ink-2); white-space:nowrap}
+.grp-meter{height:5px; background:var(--surface-3); display:flex}
+.grp-meter span{height:100%}
+.tlist{display:flex; flex-direction:column}
+.task{
+  display:grid; gap:2px 11px; padding:9px 13px;
+  grid-template-columns:22px 62px minmax(0,1fr) auto;
+  align-items:start; border-top:1px solid var(--line-2);
+}
+.tlist .task:first-child{border-top:0}
+.task:hover{background:var(--surface-2)}
+@media (max-width:700px){
+  .task{grid-template-columns:22px minmax(0,1fr); }
+  .task .tcode{grid-column:2}
+  .task .tbody{grid-column:2}
+  .task .tmeta{grid-column:2; text-align:left}
+}
+.mark{
+  width:19px; height:19px; margin-top:2px; border-radius:5px; cursor:pointer;
+  border:1.5px solid var(--ink-3); background:transparent; padding:0; flex:none;
+  display:grid; place-items:center; font-size:11px; line-height:1; color:transparent;
+  transition:background .12s, border-color .12s, color .12s;
+}
+.mark:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+.task[data-st="0"] .mark{border-color:var(--ink-3)}
+.task[data-st="1"] .mark{border-color:var(--warn); background:var(--warn-soft); color:var(--warn)}
+.task[data-st="2"] .mark{border-color:var(--ok); background:var(--ok-soft); color:var(--ok)}
+.mark[data-st="1"]{border-color:var(--warn); background:var(--warn-soft); color:var(--warn)}
+.mark[data-st="2"]{border-color:var(--ok); background:var(--ok-soft); color:var(--ok)}
+.task[data-st="2"] .tname{text-decoration:line-through; text-decoration-color:var(--ink-3); color:var(--ink-2)}
+.tcode{font-size:11.5px; font-weight:600; color:var(--ink-2); padding-top:1px}
+.tname{font-size:13.5px; font-weight:500; min-width:0}
+.tdod{font-size:11.5px; color:var(--ink-2); margin-top:1px}
+.tmeta{font-size:11.5px; color:var(--ink-2); text-align:right; white-space:nowrap; display:flex; gap:8px; justify-content:flex-end; flex-wrap:wrap}
+.chip{
+  display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:600;
+  padding:2px 7px; border-radius:99px; background:var(--surface-3); color:var(--ink-2);
+  white-space:nowrap;
+}
+.chip.p{background:transparent; border:1px solid var(--line); color:var(--ink-2)}
+.crit{background:var(--danger-soft); color:var(--danger)}
+.dep{font-size:11px; color:var(--ink-3)}
+
+/* ---------- table ---------- */
+.tw{overflow-x:auto; border:1px solid var(--line); border-radius:var(--r); background:var(--surface)}
+table{border-collapse:collapse; width:100%; font-size:12.5px; min-width:560px}
+th,td{padding:8px 11px; text-align:left; border-bottom:1px solid var(--line-2); vertical-align:top}
+th{font-size:11px; font-weight:600; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-3); background:var(--surface-2); white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover{background:var(--surface-2)}
+
+/* ---------- day columns ---------- */
+.days{display:grid; grid-template-columns:repeat(7,minmax(150px,1fr)); gap:9px; overflow-x:auto; padding-bottom:4px}
+.day{background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:10px 11px; min-width:0}
+.day h3{font-size:12.5px; font-weight:700; margin-bottom:2px}
+.day .goal{font-size:11px; color:var(--ink-2); margin-bottom:8px; min-height:2.6em}
+.day ul{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:5px}
+.day li{font-size:11.5px; line-height:1.4; display:flex; gap:6px; align-items:flex-start}
+.day li::before{content:""; width:5px; height:5px; border-radius:99px; margin-top:6px; flex:none; background:var(--ink-3)}
+.day li[data-st="1"]::before{background:var(--warn)}
+.day li[data-st="2"]::before{background:var(--ok)}
+.day li span{min-width:0}
+@media (max-width:900px){ .days{grid-template-columns:repeat(7,minmax(160px,1fr))} }
+
+/* ---------- notes / callouts ---------- */
+.note{
+  border:1px solid var(--line); border-left:3px solid var(--accent);
+  background:var(--surface); border-radius:var(--r-sm);
+  padding:11px 13px; font-size:12.5px; color:var(--ink-2);
+}
+.note.danger{border-left-color:var(--danger)}
+.note.warn{border-left-color:var(--warn)}
+.note strong{color:var(--ink)}
+.note ul{margin:7px 0 0; padding-left:19px}
+.note li{margin-bottom:3px}
+
+/* ---------- progress legend ---------- */
+.legend{display:flex; gap:14px; flex-wrap:wrap; font-size:11.5px; color:var(--ink-2); margin-bottom:12px}
+.legend span{display:inline-flex; align-items:center; gap:6px}
+.sw{width:11px; height:11px; border-radius:3px; border:1.5px solid var(--ink-3)}
+.sw.do{border-color:var(--warn); background:var(--warn-soft)}
+.sw.dn{border-color:var(--ok); background:var(--ok-soft)}
+
+/* ---------- modal ---------- */
+.sheet{position:fixed; inset:0; z-index:60; display:grid; place-items:center; padding:16px;
+  background:rgba(10,12,16,.55)}
+.sheet[hidden]{display:none}
+.sheet-c{background:var(--surface); border:1px solid var(--line); border-radius:var(--r);
+  box-shadow:var(--shadow); width:100%; max-width:520px; padding:18px; display:flex; flex-direction:column; gap:11px;
+  max-height:calc(100dvh - 32px); overflow:auto}
+.sheet-c h3{font-size:15px}
+.sheet-c p{margin:0; font-size:12.5px; color:var(--ink-2)}
+textarea{
+  font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:12px; line-height:1.5;
+  width:100%; min-height:96px; resize:vertical; padding:9px 10px;
+  background:var(--bg); color:var(--ink); border:1px solid var(--line); border-radius:var(--r-sm);
+  word-break:break-all;
+}
+textarea:focus-visible{outline:2px solid var(--accent); outline-offset:1px}
+.sheet-foot{display:flex; gap:8px; justify-content:flex-end; flex-wrap:wrap}
+.sr{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap}
+.toast{
+  position:fixed; left:50%; bottom:calc(18px + env(safe-area-inset-bottom,0px)); transform:translateX(-50%);
+  background:var(--ink); color:var(--bg); font-size:12.5px; font-weight:600;
+  padding:8px 14px; border-radius:99px; z-index:80; box-shadow:var(--shadow);
+}
+.toast[hidden]{display:none}
+@media (prefers-reduced-motion:reduce){ *{transition:none !important; animation:none !important} }
+</style>
+
+<header class="masthead">
+  <div class="masthead-in">
+    <div class="mh-title">
+      <h1>Bài 4 · Bảng điều khiển nhóm</h1>
+      <p>5 thành viên · 7 ngày · 5 deliverable ①–⑤</p>
+    </div>
+    <div class="mh-prog">
+      <div class="mh-bar" id="mhBar" role="img" aria-label="Tiến độ tổng"></div>
+      <div class="mh-pct num mono" id="mhPct">0%</div>
+    </div>
+    <div class="mh-actions">
+      <button class="btn" id="btnExport" type="button">Xuất tiến độ</button>
+      <button class="btn" id="btnImport" type="button">Nhập</button>
+      <button class="btn" id="btnReset" type="button">Đặt lại</button>
+    </div>
+  </div>
+</header>
+
+<nav class="tabs" aria-label="Mục">
+  <div class="tabs-in" role="tablist" id="tabbar"></div>
+</nav>
+
+<div class="wrap">
+  <section class="panel" id="p-over" role="tabpanel" aria-labelledby="t-over"></section>
+  <section class="panel" id="p-wbs" role="tabpanel" aria-labelledby="t-wbs" hidden></section>
+  <section class="panel" id="p-people" role="tabpanel" aria-labelledby="t-people" hidden></section>
+  <section class="panel" id="p-days" role="tabpanel" aria-labelledby="t-days" hidden></section>
+  <section class="panel" id="p-nr" role="tabpanel" aria-labelledby="t-nr" hidden></section>
+  <section class="panel" id="p-qa" role="tabpanel" aria-labelledby="t-qa" hidden></section>
+</div>
+
+<div class="sheet" id="sheet" hidden>
+  <div class="sheet-c" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+    <h3 id="sheetTitle">Mã tiến độ</h3>
+    <p id="sheetHint"></p>
+    <label class="sr" for="sheetText">Mã tiến độ</label>
+    <textarea id="sheetText" spellcheck="false" autocomplete="off"></textarea>
+    <div class="sheet-foot">
+      <button class="btn" id="sheetClose" type="button">Đóng</button>
+      <button class="btn btn-primary" id="sheetAction" type="button">Sao chép</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" hidden role="status" aria-live="polite"></div>
+
+<script>
+"use strict";
+
+/* ============ DỮ LIỆU ============ */
+const PEOPLE = {
+  vong:{name:"Lê Ngô Kỳ Vọng", short:"Vọng", role:"E · Integration & Documentation Lead",
+        reviews:"bao", reviewedBy:"khoa", slides:"S1 · S13 · S15", speak:"~3:00",
+        qaOwn:"Q13 Q19 Q20 Q23 Q24", qaCross:"Q6 Q7 Q11 Q18 Q21", nrs:["NR-5","NR-11"]},
+  bao:{ name:"Nguyễn Thái Bảo", short:"Bảo", role:"A · Business Analyst",
+        reviews:"tin", reviewedBy:"vong", slides:"S2 · S3 · S14", speak:"~2:40",
+        qaOwn:"Q4 Q9 Q10 Q16 Q21", qaCross:"Q1 Q12 Q14 Q23", nrs:["NR-4"]},
+  tin:{ name:"Dương Vĩ Tín", short:"Tín", role:"B · Domain Model Designer",
+        reviews:"khang", reviewedBy:"bao", slides:"S4 · S5 · S6", speak:"~2:45",
+        qaOwn:"Q1 Q2 Q3 Q17 Q25", qaCross:"Q8 Q10 Q13 Q16 Q24", nrs:["NR-1","NR-2"]},
+  khoa:{name:"Từ Đăng Khoa", short:"Khoa", role:"D · Responsibility & Design Reviewer",
+        reviews:"vong", reviewedBy:"khang", slides:"S7 · S8 · S12", speak:"~2:45",
+        qaOwn:"Q7 Q11 Q12 Q15 Q22", qaCross:"Q4 Q5 Q9 Q17 Q19 Q25",
+        nrs:["NR-3","NR-4","NR-5","NR-6","NR-7","NR-10"]},
+  khang:{name:"Khang", short:"Khang", role:"C · UML / Design Architect",
+        reviews:"khoa", reviewedBy:"tin", slides:"S9 · S10 · S11", speak:"~2:45",
+        qaOwn:"Q5 Q6 Q8 Q14 Q18", qaCross:"Q2 Q3 Q15 Q20 Q22",
+        nrs:["NR-1","NR-2","NR-3","NR-7","NR-8","NR-9"]}
+};
+
+/* t: mã · g: nhóm WBS · n: tên · o: owner (khóa PEOPLE hoặc "all")
+   f: file · e: giờ · d: phụ thuộc · y: ngày · do: điều kiện hoàn thành · crit */
+const TASKS = [
+  {t:"T0.1",g:"1.0",n:"Gạch chân động từ “phải” trong đề → requirement checklist",o:"bao",f:"00-checklist.md",e:1.0,d:"—",y:1,do:"Đủ 7 yêu cầu, mỗi yêu cầu có tiêu chí chấm được"},
+  {t:"T0.2",g:"1.0",n:"Lập deliverable checklist ①–⑤",o:"bao",f:"00-checklist.md",e:0.5,d:"T0.1",y:1,do:"Ánh xạ ①–⑤ ↔ file thật trong project/"},
+  {t:"T0.3",g:"1.0",n:"Soạn tiêu chí tự chấm (3–5 tiêu chí mỗi deliverable)",o:"bao",f:"00-checklist.md",e:1.0,d:"T0.2",y:1,do:"Mỗi tiêu chí kiểm chứng được (có/không)"},
+  {t:"T1.1",g:"1.0",n:"Liệt kê Actors: Customer, Hệ thống thanh toán ngoài, Kho",o:"bao",f:"business-analysis.md",e:0.5,d:"T0.3",y:1,do:"Ghi rõ actor nào nằm ngoài hệ thống"},
+  {t:"T1.2",g:"1.0",n:"Bảng Noun → Candidate class / Attribute / Loại bỏ + lý do",o:"bao",f:"business-analysis.md",e:2.0,d:"T1.1",y:1,do:"Mọi noun có phán quyết; mục loại bỏ có lý do"},
+  {t:"T1.3",g:"1.0",n:"Bảng Verb → Responsibility ứng viên",o:"bao",f:"business-analysis.md",e:1.5,d:"T1.2",y:1,do:"Phủ đủ 8 verb: calculate, add, remove, check, reserve, pay, place, cancel"},
+  {t:"T1.4",g:"1.0",n:"Chốt BR1–BR11, gắn mã",o:"bao",f:"business-analysis.md",e:2.0,d:"T1.3",y:1,crit:1,do:"Không mâu thuẫn; cả nhóm đã thống nhất"},
+  {t:"T1.5",g:"1.0",n:"Vẽ luồng đặt hàng: happy path + 2 nhánh lỗi",o:"bao",f:"business-analysis.md",e:2.0,d:"T1.4",y:1,do:"Đủ 3 kịch bản: thành công, hết hàng, thanh toán fail"},
+
+  {t:"T2.1",g:"2.0",n:"Vẽ 4 class + attribute nghiệp vụ (chưa có method điều phối)",o:"tin",f:"domain-model.md/.mmd",e:2.5,d:"T1.4",y:2,do:"Đủ Customer, Order, OrderLine, Product"},
+  {t:"T2.2",g:"2.0",n:"Quan hệ + multiplicity + giải thích từng đường",o:"tin",f:"domain-model.md",e:2.0,d:"T2.1",y:2,do:"Mỗi dấu * trả lời được “tối thiểu bao nhiêu?”"},
+  {t:"T2.3",g:"2.0",n:"Mục “Vì sao cần OrderLine” (Mouse ×2, Keyboard ×1 = 900.000)",o:"tin",f:"orderline-analysis.md",e:1.5,d:"T2.2",y:2,do:"Có ví dụ số cụ thể"},
+  {t:"T2.4",g:"2.0",n:"Xác nhận ownership: Order composition OrderLine; OrderLine association Product",o:"tin",f:"domain-model.md",e:1.0,d:"T2.2",y:2,do:"Phân biệt được composition vs association"},
+  {t:"T2.5",g:"2.0",n:"Tự kiểm: có quan hệ thừa không? (Customer–Product trực tiếp)",o:"tin",f:"domain-model.md",e:1.0,d:"T2.4",y:2,do:"Không còn quan hệ thừa"},
+
+  {t:"T3.1",g:"3.0",n:"Bảng quyết định cho ≥ 9 responsibility",o:"khoa",f:"responsibility-decisions.md",e:2.5,d:"T2.1",y:3,do:"Mỗi dòng có candidate + lý do chọn"},
+  {t:"T3.2",g:"3.0",n:"Bảng CRC / Responsibility Table",o:"khoa",f:"responsibility-matrix.md",e:2.0,d:"T3.1",y:3,do:"Trả lời được 7 câu “Ai…?”"},
+  {t:"T3.3",g:"3.0",n:"Kiểm tra God Class",o:"khoa",f:"god-class-check.md",e:1.5,d:"T3.2",y:3,do:"Kết luận rõ: Order có/không là God Class"},
+  {t:"T3.4",g:"3.0",n:"Mini-review cả nhóm 45 phút",o:"all",f:"biên bản",e:0.75,d:"T3.3",y:3,do:"Không method nào vô chủ; bảng khớp BR"},
+
+  {t:"T4.1",g:"4.0",n:"Domain → Design: thêm kiểu dữ liệu, visibility, method theo matrix",o:"khang",f:"design-class-diagram.md/.mmd",e:2.5,d:"T3.2",y:4,do:"Mỗi method truy được về Matrix"},
+  {t:"T4.2",g:"4.0",n:"Thêm 3 Service chỉ vì lý do đã ghi trong matrix",o:"khang",f:"design-class-diagram.mmd",e:1.5,d:"T4.1",y:4,do:"Không Service nào “thêm cho đẹp”"},
+  {t:"T4.3",g:"4.0",n:"Vẽ dependency (nét đứt) vs association (nét liền) đúng loại",o:"khang",f:"design-class-diagram.mmd",e:1.5,d:"T4.2",y:4,do:"Mũi tên chỉ Service → Domain"},
+  {t:"T4.4",g:"4.0",n:"Đoạn “Vì sao Design có Service còn Domain thì không”",o:"khang",f:"design-class-diagram.md",e:1.0,d:"T4.2",y:4,do:"Trả lời được mục tiêu ⑥ của đề"},
+  {t:"T4.5",g:"4.0",n:"Sequence placeOrder (1 happy + 2 nhánh lỗi)",o:"khang",f:"sequence-placeOrder.mmd",e:3.0,d:"T4.3",y:4,crit:1,do:"Bàn giao cho Vọng trước cuối Day 4"},
+
+  {t:"T5.1",g:"5.0",n:"Mô tả Design A (centralized) & Design B (distributed) cùng một kịch bản",o:"khoa",f:"design-comparison.md",e:2.0,d:"T4.1",y:4,do:"Cùng input, khác cách xử lý"},
+  {t:"T5.2",g:"5.0",n:"Bảng so sánh 8 tiêu chí",o:"khoa",f:"design-comparison.md",e:1.5,d:"T5.1",y:4,do:"Có điểm yếu của phương án đã chọn"},
+  {t:"T5.3",g:"5.0",n:"Chọn phương án + phản biện lại chính lựa chọn",o:"khoa",f:"design-comparison.md",e:1.5,d:"T5.2",y:4,do:"Có ví dụ MoMo"},
+
+  {t:"T6.1-V",g:"6.0",n:"Trả lời 7 câu hỏi review (Vọng review Bảo)",o:"vong",f:"peer-review-matrix.md",e:0.25,d:"T5.3",y:5,do:"Không trả lời “ok hết”"},
+  {t:"T6.1-B",g:"6.0",n:"Trả lời 7 câu hỏi review (Bảo review Tín)",o:"bao",f:"peer-review-matrix.md",e:0.25,d:"T5.3",y:5,do:"Không trả lời “ok hết”"},
+  {t:"T6.1-T",g:"6.0",n:"Trả lời 7 câu hỏi review (Tín review Khang)",o:"tin",f:"peer-review-matrix.md",e:0.25,d:"T5.3",y:5,do:"Không trả lời “ok hết”"},
+  {t:"T6.1-K",g:"6.0",n:"Trả lời 7 câu hỏi review (Khang review Khoa)",o:"khang",f:"peer-review-matrix.md",e:0.25,d:"T5.3",y:5,do:"Không trả lời “ok hết”"},
+  {t:"T6.1-Kh",g:"6.0",n:"Trả lời 7 câu hỏi review (Khoa review Vọng)",o:"khoa",f:"peer-review-matrix.md",e:0.25,d:"T5.3",y:5,do:"Không trả lời “ok hết”"},
+  {t:"T6.2",g:"6.0",n:"Gom bảng Reviewer / Reviewee / Vấn đề / Đề xuất / Đã sửa",o:"bao",f:"peer-review-matrix.md",e:1.0,d:"T6.1-V",y:5,crit:1,do:"≥ 3 vấn đề thật (phục vụ slide S14)"},
+  {t:"T6.3",g:"6.0",n:"Owner phản hồi từng ý: Chấp nhận / Từ chối kèm lý do",o:"all",f:"changes-after-review.md",e:1.0,d:"T6.2",y:5,do:"Mọi ý kiến có phản hồi"},
+
+  {t:"T7.1",g:"7.0",n:"Domain ↔ Class Diagram: đối chiếu 1–1 (Service là ngoại lệ có lý do)",o:"vong",f:"biên bản",e:1.0,d:"T4.5",y:6,do:"Không class nào vô lý ở một bên"},
+  {t:"T7.2",g:"7.0",n:"Class Diagram ↔ Responsibility: mọi method có dòng trong bảng & ngược lại",o:"vong",f:"biên bản",e:1.0,d:"T7.1",y:6,do:"Xử lý NR-10"},
+  {t:"T7.3",g:"7.0",n:"Responsibility ↔ BR: mỗi BR có class thực thi (ma trận BR × Class)",o:"vong",f:"biên bản",e:1.0,d:"T7.2",y:6,do:"11/11 BR có người thực thi"},
+  {t:"T7.4",g:"7.0",n:"Diagram ↔ Report: thống nhất tên class/method/trạng thái",o:"vong",f:"report.md",e:2.5,d:"T7.3",y:6,do:"Khớp bảng thuật ngữ chung"},
+  {t:"T7.5",g:"7.0",n:"Báo cáo hoàn chỉnh (9 chương + phụ lục)",o:"vong",f:"report.md/.docx",e:5.0,d:"T7.4",y:6,crit:1,do:"Người ngoài nhóm đọc không rối"},
+
+  {t:"T8.1",g:"8.0",n:"Template slide (font ≥ 24pt, bảng màu thống nhất)",o:"vong",f:"slides/",e:1.5,d:"—",y:1,do:"Xong trong Day 1"},
+  {t:"T8.2-V",g:"8.0",n:"Soạn slide S1 · S13 · S15",o:"vong",f:"slides/S1,S13,S15",e:1.2,d:"T8.1",y:6,do:"Đúng key message ở Part D"},
+  {t:"T8.2-B",g:"8.0",n:"Soạn slide S2 · S3 · S14",o:"bao",f:"slides/S2,S3,S14",e:1.2,d:"T8.1",y:6,do:"Đúng key message ở Part D"},
+  {t:"T8.2-T",g:"8.0",n:"Soạn slide S4 · S5 · S6",o:"tin",f:"slides/S4,S5,S6",e:1.2,d:"T8.1",y:6,do:"Đúng key message ở Part D"},
+  {t:"T8.2-K",g:"8.0",n:"Soạn slide S7 · S8 · S12",o:"khoa",f:"slides/S7,S8,S12",e:1.2,d:"T8.1",y:6,do:"Đúng key message ở Part D"},
+  {t:"T8.2-Kh",g:"8.0",n:"Soạn slide S9 · S10 · S11",o:"khang",f:"slides/S9,S10,S11",e:1.2,d:"T8.1",y:6,do:"Đúng key message ở Part D"},
+  {t:"T8.3-V",g:"8.0",n:"Speaker script + notes — Vọng",o:"vong",f:"script/vong.md",e:0.8,d:"T8.2-V",y:5,do:"Có câu chuyển vào/ra"},
+  {t:"T8.3-B",g:"8.0",n:"Speaker script + notes — Bảo",o:"bao",f:"script/bao.md",e:0.8,d:"T8.2-B",y:5,do:"Có câu chuyển vào/ra"},
+  {t:"T8.3-T",g:"8.0",n:"Speaker script + notes — Tín",o:"tin",f:"script/tin.md",e:0.8,d:"T8.2-T",y:5,do:"Có câu chuyển vào/ra"},
+  {t:"T8.3-K",g:"8.0",n:"Speaker script + notes — Khoa",o:"khoa",f:"script/khoa.md",e:0.8,d:"T8.2-K",y:5,do:"Có câu chuyển vào/ra"},
+  {t:"T8.3-Kh",g:"8.0",n:"Speaker script + notes — Khang",o:"khang",f:"script/khang.md",e:0.8,d:"T8.2-Kh",y:5,do:"Có câu chuyển vào/ra"},
+  {t:"T8.4",g:"8.0",n:"Q&A bank 25 câu × 3 tầng (Part F–L đang thiếu)",o:"all",f:"qa-bank.md",e:4.0,d:"T8.3-V",y:6,crit:1,do:"Mỗi câu có Owner + Cross"},
+  {t:"T8.5",g:"8.0",n:"Cross-training matrix",o:"vong",f:"cross-training.md",e:1.5,d:"T8.4",y:6,do:"Mỗi người trả lời được câu của người khác"},
+  {t:"T8.6",g:"8.0",n:"Day 7 — Training Round 1–5",o:"all",f:"biên bản",e:3.0,d:"T8.5",y:7,crit:1,do:"Tổng 13–14 phút; không ai im > 5 giây"},
+  {t:"T8.7",g:"8.0",n:"Slide freeze + backup PDF",o:"vong",f:"slides-final.pdf",e:0.5,d:"T8.2-V",y:6,do:"Cuối Day 6"},
+
+  {t:"T9.1",g:"9.0",n:"Chốt 11 điểm NEED REVIEW",o:"all",f:"nr-log.md",e:4.0,d:"—",y:6,do:"Đóng 11/11 trước Day 6"},
+  {t:"T10.1",g:"10.0",n:"Tracker + bảng thuật ngữ chung",o:"vong",f:"glossary.md",e:1.5,d:"—",y:1,do:"Không có 2 cách viết tên class/method"},
+  {t:"T10.2",g:"10.0",n:"Kiểm DoD từng deliverable + Final Quality Checklist (mục L)",o:"vong",f:"checklist",e:2.0,d:"T7.5",y:7,do:"19/19 ô mục L đã tick"},
+  {t:"T10.3",g:"10.0",n:"Slide freeze (sau đó chỉ sửa lỗi chính tả)",o:"vong",f:"—",e:0.25,d:"T10.2",y:6,do:"Không còn sửa nội dung"}
+];
+
+const GROUPS = [
+  {g:"1.0", code:"①", title:"Phân tích nghiệp vụ & yêu cầu", owner:"bao",  day:1},
+  {g:"2.0", code:"②a",title:"Domain Model",                    owner:"tin",  day:2},
+  {g:"3.0", code:"③", title:"Responsibility Table",            owner:"khoa", day:3},
+  {g:"4.0", code:"②b",title:"Design Class Diagram",            owner:"khang",day:4},
+  {g:"5.0", code:"④", title:"So sánh ≥ 2 phương án thiết kế",  owner:"khoa", day:4},
+  {g:"6.0", code:"⑤", title:"Phân công & phản biện (Peer Review)", owner:"all", day:5},
+  {g:"7.0", code:"",  title:"Tích hợp & Báo cáo",              owner:"vong", day:6},
+  {g:"8.0", code:"",  title:"Thuyết trình & Bảo vệ",           owner:"all",  day:7},
+  {g:"9.0", code:"",  title:"Chốt NEED REVIEW",                owner:"all",  day:6},
+  {g:"10.0",code:"",  title:"Quản lý & Chất lượng",            owner:"vong", day:7}
+];
+
+const NRS = [
+  {id:"NR-1", p:"BR2 / Q7 vs H.3 bước 1", w:"BR2 nói Order tạo cùng dòng đầu; H.3 lại new Order() rồi mới addOrderLine → có lúc Order 0 dòng.", who:["tin","khang"], due:4, say:"Đơn luôn có ít nhất một dòng khi vào quy trình"},
+  {id:"NR-2", p:"G.2, H.2, H.4", w:"G.2 có customer/getOrders(); H.2 không; H.4 nói một chiều nhưng hình vẽ ngược lại.", who:["tin","khang"], due:4, say:"Customer 1 — 0..* Order (chỉ nói multiplicity)"},
+  {id:"NR-3", p:"B (Reserve ≠ Deduct), G.2", w:"Nói reserve ≠ deduct nhưng Product chỉ có stockQuantity, không có reservedQuantity.", who:["khoa","khang"], due:3, say:"Reserve = giữ hàng tạm; release = trả lại"},
+  {id:"NR-4", p:"BR9, Q9, Q10, cancelOrder", w:"BR9 cho → CANCELLED chung chung; chưa rõ CREATED → CANCELLED có hợp lệ không.", who:["bao","khoa"], due:3, say:"Hết hàng thì dừng, không thanh toán, báo lỗi"},
+  {id:"NR-5", p:"H.3 bước 3, Q10", w:"reserveStock trả boolean nhưng H.3 không xử lý nhánh false; có race condition.", who:["khoa","vong"], due:4, say:"Có khoảng hở check↔reserve; nêu là hạn chế"},
+  {id:"NR-6", p:"T5.2, DoD vs mục I", w:"Text nói 6 tiêu chí, bảng I có 8 dòng.", who:["khoa"], due:4, say:"Liệt kê đủ 8 tiêu chí chính"},
+  {id:"NR-7", p:"H.2, Q2", w:"Service đọc Order.getLines()/total trong khi Q2 phê phán việc lộ cấu trúc nội bộ.", who:["khang","khoa"], due:5, say:"Service chỉ đọc, không sửa trạng thái Order"},
+  {id:"NR-8", p:"H.2", w:"Order ..> OrderStatus (dependency) trong khi status là attribute của Order.", who:["khang"], due:4, say:"Trên slide không highlight đường này"},
+  {id:"NR-9", p:"H.1, H.2", w:"PaymentInfo, Money, List items dùng trong method nhưng không được khai báo.", who:["khang"], due:4, say:"Money, PaymentInfo là kiểu dữ liệu hỗ trợ"},
+  {id:"NR-10",p:"T7.2 vs G.1", w:"6 method ở diagram chưa có dòng quyết định riêng ở G.1.", who:["khoa"], due:3, say:"Khi bị hỏi: nói theo G.2 (CRC)"},
+  {id:"NR-11",p:"J.3", w:"Bảng review chỉ là mẫu; slide 14 cần ≥ 3 thay đổi thật.", who:["vong","bao","tin","khoa","khang"], due:5, say:"Slide 14 dùng [ĐIỀN SAU DAY 5]"}
+];
+
+const QA_REAL = [
+  {q:1,  s:"M.1",  t:"Tại sao cần OrderLine?"},
+  {q:2,  s:"M.2",  t:"Tại sao Order tính total?"},
+  {q:3,  s:"M.3",  t:"Tại sao InventoryService không nằm trong Order?"},
+  {q:4,  s:"M.4",  t:"Tại sao cần OrderService?"},
+  {q:5,  s:"M.5",  t:"Domain Model khác Design Class Diagram thế nào?"},
+  {q:6,  s:"M.6",  t:"Multiplicity Customer–Order là gì?"},
+  {q:7,  s:"M.7",  t:"Một Order có thể không có OrderLine không?"},
+  {q:8,  s:"M.8",  t:"Nếu Product bị đổi giá sau khi đặt hàng thì Order cũ thế nào?"},
+  {q:9,  s:"M.9",  t:"Nếu thanh toán thất bại thì Order xử lý ra sao?"},
+  {q:10, s:"M.10", t:"Nếu hết hàng thì quy trình đặt hàng thế nào?"},
+  {q:11, s:"M.11", t:"Vì sao không đưa tất cả logic vào Order?"},
+  {q:12, s:"M.12", t:"Thiết kế của nhóm có vi phạm Single Responsibility Principle không?"}
+];
+
+const QA_GAPS = [
+  {q:13, src:"NR-1", t:"Order có 0 dòng khi khởi tạo — BR2 và H.3 mâu thuẫn ở đâu?"},
+  {q:14, src:"NR-2", t:"Hướng điều hướng Order ↔ Customer: một chiều hay hai chiều, vì sao?"},
+  {q:15, src:"NR-3", t:"“Reserve ≠ Deduct” — hàng đã giữ được lưu ở đâu trong mô hình?"},
+  {q:16, src:"NR-4", t:"CREATED → CANCELLED có hợp lệ không? Hủy được ở trạng thái nào?"},
+  {q:17, src:"NR-5", t:"reserveStock trả false thì xử lý thế nào? Race condition giữa check và reserve?"},
+  {q:18, src:"NR-6", t:"So sánh A/B theo bao nhiêu tiêu chí, và tiêu chí nào quan trọng nhất?"},
+  {q:19, src:"NR-7", t:"Service đọc dữ liệu Order có vi phạm đóng gói không?"},
+  {q:20, src:"NR-8", t:"Order ..> OrderStatus là dependency hay association — vẽ thế nào mới đúng?"},
+  {q:21, src:"NR-9", t:"Money và PaymentInfo là class hay chỉ là kiểu dữ liệu hỗ trợ?"},
+  {q:22, src:"NR-10",t:"Mỗi method trong Class Diagram có dòng tương ứng trong Matrix chưa?"},
+  {q:23, src:"P.3", t:"unitPrice snapshot lúc đặt khác gì lấy lại từ Product.price?"},
+  {q:24, src:"P.6", t:"Làm sao biết thiết kế không bị Anemic Domain Model?"},
+  {q:25, src:"P.7", t:"Vì sao không dùng setStatus() công khai mà dùng markPaid()/cancel()?"}
+];
+
+const DAYS = [
+  {d:1, who:"Bảo", goal:"Chốt BR1–BR11 — mọi phase sau đều truy về đây"},
+  {d:2, who:"Tín", goal:"Tín giải thích Domain Model không nhìn tài liệu"},
+  {d:3, who:"Khoa", goal:"Bảng khớp BR; không method nào vô chủ"},
+  {d:4, who:"Khang", goal:"Diagram khớp Matrix; chọn được phương án"},
+  {d:5, who:"Cả nhóm", goal:"Mọi lỗi nghiêm trọng đã sửa hoặc có lý do giữ"},
+  {d:6, who:"Vọng", goal:"Không còn mâu thuẫn Diagram ↔ Report ↔ Slide"},
+  {d:7, who:"Cả nhóm", goal:"Bấm giờ 12–15 phút; ai cũng qua Q&A đổi chéo"}
+];
+
+/* ============ TRẠNG THÁI ============ */
+const KEY = "bai4-tracker-v1";
+let state = {};    // { taskId: 0|1|2 }
+let nrDone = {};   // { "NR-1": true }
+
+function load(){
+  try{
+    const raw = localStorage.getItem(KEY);
+    if(!raw) return;
+    const o = JSON.parse(raw);
+    if(o && typeof o === "object"){
+      state = (o.tasks && typeof o.tasks === "object") ? o.tasks : {};
+      nrDone = (o.nr && typeof o.nr === "object") ? o.nr : {};
+    }
+  }catch(e){ /* chế độ riêng tư / chặn lưu — chạy không lưu */ }
+}
+function save(){
+  try{ localStorage.setItem(KEY, JSON.stringify({tasks:state, nr:nrDone})); }
+  catch(e){ /* bỏ qua */ }
+}
+function st(id){ return state[id] ?? 0; }
+function cycle(id){ state[id] = (st(id) + 1) % 3; save(); renderAll(); }
+
+/* ============ TIỆN ÍCH ============ */
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const pname = k => k === "all" ? "Cả nhóm" : PEOPLE[k].short;
+const pcolor = k => k === "all" ? "var(--ink-3)" : `var(--p-${k})`;
+const fmt = n => (Math.round(n * 10) / 10).toString().replace(/\.0$/, "");
+const DOW = ["","Day 1","Day 2","Day 3","Day 4","Day 5","Day 6","Day 7"];
+
+/* giờ công của một người = việc họ sở hữu + phần chia đều việc chung cả nhóm */
+const sharedHours = TASKS.filter(t => t.o === "all").reduce((a, t) => a + t.e, 0);
+const perHeadShared = sharedHours / Object.keys(PEOPLE).length;
+function estOf(k){
+  return TASKS.filter(t => t.o === k).reduce((a, t) => a + t.e, 0) + perHeadShared;
+}
+/* NR là việc riêng, không nằm trong giờ công task — ước 0.5h mỗi điểm */
+const NR_H = 0.5;
+const loadOf = k => estOf(k) + PEOPLE[k].nrs.length * NR_H;
+
+function progressOf(list){
+  let done = 0, doing = 0, total = 0;
+  for(const t of list){
+    total += t.e;
+    const s = st(t.t);
+    if(s === 2) done += t.e; else if(s === 1) doing += t.e;
+  }
+  return {done, doing, total, pct: total ? Math.round(done / total * 100) : 0};
+}
+function barHtml(p, extraClass){
+  const d = p.total ? (p.done / p.total * 100) : 0;
+  const g = p.total ? (p.doing / p.total * 100) : 0;
+  return `<div class="${extraClass}">` +
+    `<span style="width:${d}%;background:var(--ok)"></span>` +
+    `<span style="width:${g}%;background:var(--warn)"></span></div>`;
+}
+function chip(k){ return `<span class="chip p"><span class="dot" style="background:${pcolor(k)}"></span>${esc(pname(k))}</span>`; }
+
+/* ============ TAB ============ */
+const TABS = [
+  {id:"over",  label:"Tổng quan"},
+  {id:"wbs",   label:"WBS"},
+  {id:"people",label:"Theo người"},
+  {id:"days",  label:"Lịch 7 ngày"},
+  {id:"nr",    label:"NEED REVIEW"},
+  {id:"qa",    label:"Q&A"}
+];
+let activeTab = "over";
+
+function renderTabs(){
+  const counts = {
+    wbs: TASKS.length,
+    nr: NRS.length,
+    qa: 25
+  };
+  document.getElementById("tabbar").innerHTML = TABS.map(t => {
+    const c = counts[t.id] ? `<span class="cnt num">${counts[t.id]}</span>` : "";
+    return `<button class="tab" role="tab" id="t-${t.id}" data-tab="${t.id}" ` +
+      `aria-selected="${activeTab === t.id}" aria-controls="p-${t.id}">${esc(t.label)}${c}</button>`;
+  }).join("");
+}
+function showTab(id){
+  activeTab = id;
+  for(const t of TABS){
+    document.getElementById("t-" + t.id).setAttribute("aria-selected", String(t.id === id));
+    const p = document.getElementById("p-" + t.id);
+    p.hidden = t.id !== id;
+  }
+  renderAll();
+}
+
+/* ============ PANEL: TỔNG QUAN ============ */
+function renderOver(){
+  const all = progressOf(TASKS);
+  const overdue = TASKS.filter(t => st(t.t) !== 2 && t.y <= 3).length;
+  const crit = TASKS.filter(t => t.crit && st(t.t) !== 2).length;
+  const totEst = TASKS.reduce((a, t) => a + t.e, 0);
+
+  const rankedLoad = Object.keys(PEOPLE)
+    .map(k => ({k, short:PEOPLE[k].short, task:estOf(k), nr:PEOPLE[k].nrs.length, total:loadOf(k)}))
+    .sort((a, b) => b.total - a.total);
+  const heavy = rankedLoad[0], light = rankedLoad[rankedLoad.length - 1];
+  const spread = heavy.total - light.total;
+
+  let html = `
+  <section class="sec">
+    <div class="sec-h"><h2>Tình trạng hôm nay</h2>
+      <p class="hint">Bấm ô vuông ở tab WBS để đổi trạng thái: ☐ chưa làm → ◐ đang làm → ☑ xong</p></div>
+    <div class="tiles">
+      <div class="tile"><div class="k">Tiến độ chung</div><div class="v num">${all.pct}%</div>
+        <div class="s">${fmt(all.done)} / ${fmt(all.total)} giờ công đã xong</div></div>
+      <div class="tile"><div class="k">Tổng khối lượng</div><div class="v num">${fmt(totEst)}h</div>
+        <div class="s">≈ ${fmt(totEst / 5)}h/người · 7 ngày · ${TASKS.length} task</div></div>
+      <div class="tile ${crit ? "warn" : ""}"><div class="k">Trên đường găng</div><div class="v num">${crit}</div>
+        <div class="s">task chưa xong, làm trễ là domino</div></div>
+      <div class="tile ${overdue ? "warn" : ""}"><div class="k">Quá hạn Day 1–3</div><div class="v num">${overdue}</div>
+        <div class="s">task chưa xong thuộc nửa đầu</div></div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-h"><h2>Tiến độ theo người</h2></div>
+    <div class="plist">`;
+
+  for(const k of Object.keys(PEOPLE)){
+    const own = TASKS.filter(t => t.o === k);
+    const p = progressOf(own);
+    const cnt = own.filter(t => st(t.t) === 2).length;
+    html += `<div class="prow">
+      <div class="who"><span class="dot" style="background:${pcolor(k)}"></span>
+        <div style="min-width:0"><div class="pname">${esc(PEOPLE[k].name)}</div>
+          <div class="psub">${esc(PEOPLE[k].role)}</div></div></div>
+      ${barHtml(p, "pbar")}
+      <div class="pstat num">${cnt}/${own.length} task · ${p.pct}% · ${fmt(estOf(k))}h</div>
+    </div>`;
+  }
+  html += `</div>
+    <div class="note warn" style="margin-top:12px">
+      <strong>${esc(heavy.short)} đang nặng nhất, ${esc(light.short)} nhẹ nhất.</strong>
+      Tải thực tế gồm cả việc chốt NEED REVIEW, mà việc này lệch hơn giờ công:
+      <ul>
+        ${rankedLoad.map(r => `<li><span class="mono">${esc(r.short)}</span> — ${fmt(r.task)}h task
+          + ${r.nr} điểm NR = <strong>${fmt(r.total)}h</strong></li>`).join("")}
+      </ul>
+      ${spread > 4 ? `Chênh lệch ${fmt(spread)}h. Cân nhắc chuyển bớt NR từ Khang/Khoa sang Tín — Tín nhẹ nhất và đã là co-owner của NR-1.
+        Xem mục 6.1 trong <span class="mono">Bai4-WORK-BREAKDOWN.md</span>.` : ""}
+    </div>
+  </section>`;
+
+  // Nhóm 8.0 + 9.0 dành cho cả nhóm
+  const team = TASKS.filter(t => t.o === "all");
+  const tp = progressOf(team);
+  html += `<section class="sec">
+    <div class="sec-h"><h2>Việc chung cả nhóm</h2></div>
+    <div class="prow">
+      <div class="who"><span class="dot" style="background:var(--ink-3)"></span>
+        <div><div class="pname">Cả nhóm</div><div class="psub">review, training, chốt NR</div></div></div>
+      ${barHtml(tp, "pbar")}
+      <div class="pstat num">${team.filter(t => st(t.t) === 2).length}/${team.length} task · ${tp.pct}%</div>
+    </div>
+  </section>`;
+
+  const blockedByCrit = TASKS.filter(t => t.crit && st(t.t) !== 2);
+  html += `<section class="sec">
+    <div class="sec-h"><h2>Đường găng</h2>
+      <p class="hint">Chuỗi quyết định: trễ một mắt là trễ cả bài</p></div>
+    <div class="note ${blockedByCrit.length ? "" : ""}">
+      <strong>${esc("T1.4")} → ${esc("T2.1")} → ${esc("T3.1")} → ${esc("T4.1")} → ${esc("T4.5")} → ${esc("S13")} → ${esc("T6.x")} → ${esc("T7.5")} → ${esc("T8.6")}</strong>
+      <ul>`;
+  for(const t of blockedByCrit){
+    html += `<li><span class="mono">${esc(t.t)}</span> — ${esc(t.n)} <span class="dep">(Day ${t.y}, ${esc(pname(t.o))})</span></li>`;
+  }
+  if(!blockedByCrit.length) html += `<li>Toàn bộ mắt đường găng đã xong.</li>`;
+  html += `</ul></div></section>`;
+
+  html += `<section class="sec">
+    <div class="sec-h"><h2>Cần quyết trước khi bắt đầu</h2></div>
+    <div class="note danger">
+      <strong>PART F–L của file kế hoạch không tồn tại.</strong>
+      Cả bản <span class="mono">.md</span> lẫn PDF đều dừng ở PART E. Thiếu: Speaker Script, Visual Plan,
+      Q&A Bank 25 câu, Câu trả lời 3 tầng, Cross-Training Matrix, Mock Defense, Checklist.
+      Hệ quả: <span class="mono">Q13–Q25</span> ở PART E chưa có nội dung câu hỏi.
+      <ul>
+        <li>Soạn lại F–L từ Day 2, đừng đợi Day 5 — nếu không, Round 3–4 ngày Day 7 không chạy được.</li>
+        <li>Điền ngày thực cho Day 1–7 (file kế hoạch chỉ ghi Day, chưa gắn ngày).</li>
+        <li>Chốt họ tên đầy đủ của Khang — bảng phân công đang ghi thiếu.</li>
+      </ul>
+    </div>
+  </section>`;
+
+  document.getElementById("p-over").innerHTML = html;
+}
+
+/* ============ PANEL: WBS ============ */
+function renderWbs(){
+  let html = `<section class="sec">
+    <div class="sec-h"><h2>Phân rã công việc</h2>
+      <p class="hint">Bấm ô vuông để đổi trạng thái</p></div>
+    <div class="legend">
+      <span><span class="sw"></span> chưa làm</span>
+      <span><span class="sw do"></span> đang làm</span>
+      <span><span class="sw dn"></span> xong</span>
+      <span><span class="dot" style="background:var(--danger)"></span> đường găng</span>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center">
+      <label class="sr" for="fOwner">Lọc theo người</label>
+      <select id="fOwner" class="btn" style="padding:6px 10px">
+        <option value=""${wbsFilter.owner === "" ? " selected" : ""}>Tất cả mọi người</option>
+        ${Object.keys(PEOPLE).map(k => `<option value="${k}"${wbsFilter.owner === k ? " selected" : ""}>${esc(PEOPLE[k].name)}</option>`).join("")}
+        <option value="all"${wbsFilter.owner === "all" ? " selected" : ""}>Việc chung cả nhóm</option>
+      </select>
+      <label class="sr" for="fHide">Ẩn việc đã xong</label>
+      <label style="font-size:12.5px;display:inline-flex;gap:6px;align-items:center;color:var(--ink-2)">
+        <input type="checkbox" id="fHide"${wbsFilter.hide ? " checked" : ""}> Ẩn việc đã xong</label>
+    </div>`;
+
+  const fo = wbsFilter.owner, fh = wbsFilter.hide;
+  for(const G of GROUPS){
+    const list = TASKS.filter(t => t.g === G.g)
+      .filter(t => !fo || t.o === fo)
+      .filter(t => !fh || st(t.t) !== 2);
+    if(!list.length) continue;
+    const p = progressOf(TASKS.filter(t => t.g === G.g));
+    html += `<div class="grp">
+      <div class="grp-h">
+        <span class="code mono">${esc(G.g)}</span>
+        ${G.code ? `<span class="chip">${esc(G.code)}</span>` : ""}
+        <h3>${esc(G.title)}</h3>
+        <span class="own">${G.owner === "all" ? "Cả nhóm" : esc(PEOPLE[G.owner].name)} · Day ${G.day}</span>
+        <span class="own num">${p.pct}%</span>
+      </div>
+      ${barHtml(p, "grp-meter")}
+      <div class="tlist">`;
+    for(const t of list){
+      html += `<div class="task" data-st="${st(t.t)}">
+        <button class="mark" type="button" data-cyc="${esc(t.t)}"
+          aria-label="Đổi trạng thái ${esc(t.t)}">✓</button>
+        <div class="tcode mono">${esc(t.t)}</div>
+        <div class="tbody">
+          <div class="tname">${esc(t.n)}</div>
+          <div class="tdod">${esc(t.do)}${t.f && t.f !== "—" ? ` · <span class="mono">${esc(t.f)}</span>` : ""}</div>
+        </div>
+        <div class="tmeta">
+          ${chip(t.o)}
+          <span class="num">${fmt(t.e)}h</span>
+          <span class="dep">Day ${t.y}</span>
+          ${t.crit ? `<span class="chip crit">đường găng</span>` : ""}
+          ${t.d && t.d !== "—" ? `<span class="dep mono">← ${esc(t.d)}</span>` : ""}
+        </div>
+      </div>`;
+    }
+    html += `</div></div>`;
+  }
+  html += `</section>`;
+  document.getElementById("p-wbs").innerHTML = html;
+}
+
+/* ============ PANEL: THEO NGƯỜI ============ */
+function renderPeople(){
+  let html = "";
+  for(const k of Object.keys(PEOPLE)){
+    const P = PEOPLE[k];
+    const own = TASKS.filter(t => t.o === k);
+    const p = progressOf(own);
+    html += `<section class="sec">
+      <div class="grp">
+        <div class="grp-h">
+          <span class="dot" style="background:${pcolor(k)}"></span>
+          <h3>${esc(P.name)}</h3>
+          <span class="own">${esc(P.role)}</span>
+        </div>
+        <div style="padding:12px 13px;display:flex;flex-direction:column;gap:12px">
+          <div class="tiles">
+            <div class="tile"><div class="k">Tiến độ</div><div class="v num">${p.pct}%</div>
+              <div class="s">${own.filter(t => st(t.t) === 2).length}/${own.length} task</div></div>
+            <div class="tile"><div class="k">Khối lượng</div><div class="v num">${fmt(estOf(k))}h</div>
+              <div class="s">+ ${fmt(P.nrs.length * NR_H)}h chốt NR = ${fmt(loadOf(k))}h</div></div>
+            <div class="tile"><div class="k">Slide</div><div class="v" style="font-size:15px">${esc(P.slides)}</div>
+              <div class="s">${esc(P.speak)}</div></div>
+            <div class="tile"><div class="k">NEED REVIEW</div><div class="v num">${P.nrs.length}</div>
+              <div class="s">${esc(P.nrs.join(" · "))}</div></div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;font-size:12px;color:var(--ink-2)">
+            <span class="chip p">đi review: ${esc(PEOPLE[P.reviews].short)}</span>
+            <span class="chip p">được review bởi: ${esc(PEOPLE[P.reviewedBy].short)}</span>
+            <span class="chip p">Q&A chính: <span class="mono">${esc(P.qaOwn)}</span></span>
+            <span class="chip p">Q&A chéo: <span class="mono">${esc(P.qaCross)}</span></span>
+          </div>
+          <div class="tlist" style="border-top:1px solid var(--line-2)">`;
+    for(const t of own){
+      html += `<div class="task" data-st="${st(t.t)}">
+        <button class="mark" type="button" data-cyc="${esc(t.t)}" aria-label="Đổi trạng thái ${esc(t.t)}">✓</button>
+        <div class="tcode mono">${esc(t.t)}</div>
+        <div class="tbody"><div class="tname">${esc(t.n)}</div>
+          <div class="tdod">${esc(t.do)}</div></div>
+        <div class="tmeta"><span class="num">${fmt(t.e)}h</span><span class="dep">Day ${t.y}</span></div>
+      </div>`;
+    }
+    html += `</div></div></div></section>`;
+  }
+  document.getElementById("p-people").innerHTML = html;
+}
+
+/* ============ PANEL: LỊCH ============ */
+function renderDays(){
+  let html = `<section class="sec">
+    <div class="sec-h"><h2>Lịch 7 ngày</h2>
+      <p class="hint">Cuộn ngang để xem hết tuần</p></div>
+    <div class="days">`;
+  for(const D of DAYS){
+    const list = TASKS.filter(t => t.y === D.d);
+    html += `<div class="day">
+      <h3>Day ${D.d}</h3>
+      <div class="psub" style="margin-bottom:4px">${esc(D.who)}</div>
+      <div class="goal">${esc(D.goal)}</div>
+      <ul>`;
+    for(const t of list){
+      html += `<li data-st="${st(t.t)}"><span><span class="mono">${esc(t.t)}</span> ${esc(t.n)}
+        <span class="dep">· ${esc(pname(t.o))} · ${fmt(t.e)}h</span></span></li>`;
+    }
+    html += `</ul></div>`;
+  }
+  html += `</div></section>
+  <section class="sec">
+    <div class="sec-h"><h2>Day 7 — Training (≈ 3 giờ)</h2></div>
+    <div class="tw"><table>
+      <thead><tr><th>Vòng</th><th>Nội dung</th><th>Thời gian</th><th>Tiêu chí qua vòng</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">Round 1</td><td>Mỗi người nói phần của mình</td><td class="num">5×4′ + 10′</td><td>Không đọc nguyên văn; có câu chuyển</td></tr>
+        <tr><td class="mono">Round 2</td><td>Bấm giờ toàn bài, đúng thứ tự S1→S15</td><td class="num">15′ + 10′</td><td>Tổng 13–14′; mỗi người 2:30–3:15</td></tr>
+        <tr><td class="mono">Round 3</td><td>Một người đóng vai giảng viên</td><td class="num">30′</td><td>Không im lặng &gt; 5 giây, nêu được nguyên tắc</td></tr>
+        <tr><td class="mono">Round 4</td><td>Hỏi ngẫu nhiên (rút thăm Q1–Q25)</td><td class="num">25′</td><td>≥ 80% đạt tầng 10s; ≥ 50% đạt tầng 30s</td></tr>
+        <tr><td class="mono">Round 5</td><td>Đổi người trả lời theo cột Cross</td><td class="num">25′</td><td>Cross-person đạt tầng 30s</td></tr>
+        <tr><td class="mono">Chốt</td><td>Sửa script, kiểm Part L, backup file</td><td class="num">20′</td><td>Tick hết Part L</td></tr>
+      </tbody>
+    </table></div>
+    <div class="note" style="margin-top:12px">
+      <strong>Buffer nếu chỉ có 5 ngày:</strong> gộp Day 1+2 và Day 6+7.
+      Không bỏ Day 5 (review) và không bỏ Round 4–5 (Q&A chéo).
+    </div>
+  </section>`;
+  document.getElementById("p-days").innerHTML = html;
+}
+
+/* ============ PANEL: NR ============ */
+function renderNr(){
+  let html = `<section class="sec">
+    <div class="sec-h"><h2>11 điểm NEED REVIEW</h2>
+      <p class="hint">Đây cũng là chỗ giảng viên dễ hỏi nhất — chốt xong thì thành “thay đổi sau phản biện” thật cho slide S14</p></div>
+    <div class="tw"><table>
+      <thead><tr><th>Mã</th><th>Vị trí</th><th>Vấn đề</th><th>Người quyết</th><th>Hạn</th><th>Cách nói tạm</th><th>Xong</th></tr></thead>
+      <tbody>`;
+  for(const n of NRS){
+    const done = nrDone[n.id] ? 2 : 0;
+    html += `<tr>
+      <td class="mono" style="font-weight:600">${esc(n.id)}</td>
+      <td class="mono" style="font-size:11.5px;color:var(--ink-2)">${esc(n.p)}</td>
+      <td>${esc(n.w)}</td>
+      <td>${n.who.map(chip).join(" ")}</td>
+      <td class="num">Day ${n.due}</td>
+      <td style="color:var(--ink-2)">${esc(n.say)}</td>
+      <td><button class="mark" type="button" data-nr="${esc(n.id)}" data-st="${done}"
+        aria-label="Đánh dấu ${esc(n.id)} đã chốt">✓</button></td>
+    </tr>`;
+  }
+  const closed = NRS.filter(n => nrDone[n.id]).length;
+  html += `</tbody></table></div>
+    <div class="note" style="margin-top:12px">
+      <strong>${closed}/${NRS.length} điểm đã chốt.</strong>
+      ${closed === NRS.length ? " Toàn bộ đã đóng — có thể dùng làm dữ liệu thật cho slide S14."
+        : " Hạn chót đóng tất cả: cuối Day 6."}
+    </div>
+  </section>`;
+  document.getElementById("p-nr").innerHTML = html;
+}
+
+/* ============ PANEL: Q&A ============ */
+function renderQa(){
+  let html = `<section class="sec">
+    <div class="sec-h"><h2>Phân công Q&A</h2>
+      <p class="hint">Người chính trả lời câu của mình; người chéo phải trả lời được khi bị hỏi thay</p></div>
+    <div class="tw"><table>
+      <thead><tr><th>Người</th><th>Q&A chính</th><th>Q&A chéo</th><th>Slide</th><th>Thời gian</th></tr></thead>
+      <tbody>
+        ${Object.keys(PEOPLE).map(k => `<tr>
+          <td>${chip(k)}</td>
+          <td class="mono">${esc(PEOPLE[k].qaOwn)}</td>
+          <td class="mono">${esc(PEOPLE[k].qaCross)}</td>
+          <td class="mono">${esc(PEOPLE[k].slides)}</td>
+          <td class="num">${esc(PEOPLE[k].speak)}</td>
+        </tr>`).join("")}
+      </tbody>
+    </table></div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-h"><h2>Q1–Q12 · có nội dung thật</h2>
+      <p class="hint">Lấy từ plan gốc, mục M</p></div>
+    <div class="tw"><table>
+      <thead><tr><th>Câu</th><th>Nguồn</th><th>Nội dung</th></tr></thead>
+      <tbody>
+        ${QA_REAL.map(r => `<tr>
+          <td class="mono">Q${r.q}</td>
+          <td class="mono" style="color:var(--ink-2)">${esc(r.s)}</td>
+          <td>${esc(r.t)}</td>
+        </tr>`).join("")}
+      </tbody>
+    </table></div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-h"><h2>Q13–Q25 · chủ đề gợi ý</h2></div>
+    <div class="note danger">
+      <strong>Chưa có nội dung chính thức.</strong>
+      PART H/I của file kế hoạch không tồn tại, nên 13 câu này chưa được viết.
+      Bảng dưới là chủ đề suy ra từ 11 điểm NEED REVIEW và 16 lỗi thường gặp (mục P) —
+      nhóm cần tự chốt cách hỏi và đáp án 3 tầng trước Day 6.
+    </div>
+    <div class="tw" style="margin-top:12px"><table>
+      <thead><tr><th>Câu</th><th>Suy ra từ</th><th>Chủ đề cần soạn</th></tr></thead>
+      <tbody>
+        ${QA_GAPS.map(r => `<tr>
+          <td class="mono">Q${r.q}</td>
+          <td class="mono" style="color:var(--ink-2)">${esc(r.src)}</td>
+          <td>${esc(r.t)}</td>
+        </tr>`).join("")}
+      </tbody>
+    </table></div>
+  </section>`;
+  document.getElementById("p-qa").innerHTML = html;
+}
+
+/* ============ XUẤT / NHẬP ============ */
+function encode(){
+  return "B4v1:" + TASKS.map(t => st(t.t)).join("");
+}
+function decode(str){
+  const s = String(str).trim();
+  const m = s.match(/^B4v1:([0-2]+)$/);
+  if(!m) return null;
+  const digits = m[1];
+  if(digits.length !== TASKS.length) return {mismatch:true, digits};
+  return {digits};
+}
+function mergeDigits(digits){
+  let changed = 0;
+  for(let i = 0; i < TASKS.length && i < digits.length; i++){
+    const incoming = Number(digits[i]);
+    if(incoming > st(TASKS[i].t)){ state[TASKS[i].t] = incoming; changed++; }
+  }
+  save();
+  return changed;
+}
+
+/* ============ SHEET / TOAST ============ */
+const sheet = document.getElementById("sheet");
+const sheetText = document.getElementById("sheetText");
+const sheetHint = document.getElementById("sheetHint");
+const sheetAction = document.getElementById("sheetAction");
+let sheetMode = "export";
+
+function openSheet(mode){
+  sheetMode = mode;
+  document.getElementById("sheetTitle").textContent = mode === "export" ? "Mã tiến độ của bạn" : "Dán mã tiến độ";
+  sheetHint.textContent = mode === "export"
+    ? "Sao chép rồi dán vào nhóm chat. Nhập mã của người khác sẽ gộp tiến độ (lấy mức cao nhất)."
+    : "Dán mã B4v1:… của thành viên khác để gộp vào bảng này.";
+  sheetText.value = mode === "export" ? encode() : "";
+  sheetText.readOnly = mode === "export";
+  sheetAction.textContent = mode === "export" ? "Sao chép" : "Gộp vào bảng";
+  sheet.hidden = false;
+  if(mode === "import") sheetText.focus(); else sheetText.select();
+}
+function closeSheet(){ sheet.hidden = true; }
+
+let toastTimer = null;
+function toast(msg){
+  const el = document.getElementById("toast");
+  el.textContent = msg; el.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.hidden = true; }, 2400);
+}
+
+async function copyText(text){
+  try{
+    await navigator.clipboard.writeText(text);
+    return true;
+  }catch(e){
+    try{ sheetText.select(); document.execCommand("copy"); return true; }
+    catch(e2){ return false; }
+  }
+}
+
+/* ============ SỰ KIỆN ============ */
+let wbsFilter = {owner:"", hide:false};
+
+function syncTabsTop(){
+  const mh = document.querySelector(".masthead");
+  if(mh) document.documentElement.style.setProperty("--mh-h", mh.offsetHeight + "px");
+}
+
+function renderAll(){
+  renderTabs();
+  if(activeTab === "over")   renderOver();
+  if(activeTab === "wbs")    renderWbs();
+  if(activeTab === "people") renderPeople();
+  if(activeTab === "days")   renderDays();
+  if(activeTab === "nr")     renderNr();
+  if(activeTab === "qa")     renderQa();
+
+  // thanh tiến độ trên header
+  const p = progressOf(TASKS);
+  document.getElementById("mhBar").innerHTML =
+    `<span style="width:${p.total ? p.done / p.total * 100 : 0}%;background:var(--ok)"></span>` +
+    `<span style="width:${p.total ? p.doing / p.total * 100 : 0}%;background:var(--warn)"></span>`;
+  document.getElementById("mhPct").textContent = p.pct + "%";
+}
+
+document.addEventListener("click", e => {
+  const tab = e.target.closest("[data-tab]");
+  if(tab){ showTab(tab.dataset.tab); return; }
+
+  const cyc = e.target.closest("[data-cyc]");
+  if(cyc){ cycle(cyc.dataset.cyc); return; }
+
+  const nr = e.target.closest("[data-nr]");
+  if(nr){
+    const id = nr.dataset.nr;
+    nrDone[id] = !nrDone[id];
+    save();
+    renderNr();
+    return;
+  }
+  if(e.target === sheet) closeSheet();
+});
+
+document.addEventListener("change", e => {
+  if(e.target.id === "fOwner"){ wbsFilter.owner = e.target.value; renderWbs(); }
+  if(e.target.id === "fHide"){ wbsFilter.hide = e.target.checked; renderWbs(); }
+});
+
+document.getElementById("btnExport").addEventListener("click", () => openSheet("export"));
+document.getElementById("btnImport").addEventListener("click", () => openSheet("import"));
+document.getElementById("sheetClose").addEventListener("click", closeSheet);
+document.addEventListener("keydown", e => { if(e.key === "Escape" && !sheet.hidden) closeSheet(); });
+
+document.getElementById("sheetAction").addEventListener("click", async () => {
+  if(sheetMode === "export"){
+    const ok = await copyText(sheetText.value);
+    toast(ok ? "Đã sao chép mã tiến độ" : "Không sao chép được — hãy chọn và copy thủ công");
+  }else{
+    const res = decode(sheetText.value);
+    if(!res){ toast("Mã không hợp lệ — phải bắt đầu bằng B4v1:"); return; }
+    if(res.mismatch){
+      toast(`Mã có ${res.digits.length} mục, bảng cần ${TASKS.length} — bản mã khác phiên bản`);
+      return;
+    }
+    const n = mergeDigits(res.digits);
+    closeSheet();
+    renderAll();
+    toast(n ? `Đã gộp ${n} mục tiến độ` : "Không có mục nào mới để gộp");
+  }
+});
+
+document.getElementById("btnReset").addEventListener("click", () => {
+  state = {}; nrDone = {};
+  save();
+  renderAll();
+  toast("Đã đặt lại toàn bộ tiến độ");
+});
+
+/* ============ KHỞI ĐỘNG ============ */
+load();
+renderAll();
+syncTabsTop();
+window.addEventListener("resize", syncTabsTop);
+</script>

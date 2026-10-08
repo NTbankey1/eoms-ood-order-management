@@ -1,0 +1,46 @@
+%% Bài 4 — Domain Model
+%% Nguồn: Bai4-Ke-hoach-thiet-ke-OOD.md mục F.1
+%% Domain Model KHÔNG có method điều phối, KHÔNG có Service.
+%% Chỉ có khái niệm, thuộc tính và quan hệ.
+%%
+%% ⚠ NEED REVIEW liên quan (đừng tự sửa — nhóm chốt theo mục A.5):
+%%   NR-2  Hướng điều hướng Customer → Order mâu thuẫn giữa G.2 / H.2 / H.4.
+%%         File này giữ nguyên như H.2 vẽ. Trên slide chỉ nói multiplicity.
+%%   NR-1  BR2 nói Order luôn có ≥1 dòng, nhưng H.3 lại new Order() rồi mới
+%%         addOrderLine → có lúc Order 0 dòng. Hình vẽ 1..* theo BR2.
+%%
+%% Quy ước multiplicity (mục F.2):
+%%   Customer → Order     : 1 → 0..*   khách mới chưa có đơn
+%%   Order → OrderLine    : 1 → 1..*   composition, Order rỗng vô nghĩa (BR2)
+%%   OrderLine → Product  : 0..* → 1   sản phẩm chưa bán vẫn tồn tại
+
+classDiagram
+    direction LR
+
+    class Customer {
+        customerId
+        name
+        email
+        address
+    }
+
+    class Order {
+        orderId
+        orderDate
+        status
+    }
+
+    class OrderLine {
+        quantity
+        unitPrice
+    }
+
+    class Product {
+        productId
+        name
+        price
+    }
+
+    Customer "1" --> "0..*" Order : places
+    Order "1" *-- "1..*" OrderLine : consists of
+    OrderLine "0..*" --> "1" Product : refers to

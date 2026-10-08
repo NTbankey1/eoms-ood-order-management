@@ -1,0 +1,105 @@
+%% Bài 4 — Design Class Diagram
+%% Nguồn: Bai4-Ke-hoach-thiet-ke-OOD.md mục H.2
+%% Khác Domain Model ở chỗ: có visibility, kiểu dữ liệu, method, và 3 Service.
+%% Nguyên tắc: mũi tên CHỈ đi từ Service vào Domain. Domain không biết Service.
+%%
+%% ⚠ NEED REVIEW liên quan (đừng tự sửa — nhóm chốt theo mục A.5):
+%%   NR-8   Dòng `Order ..> OrderStatus : uses` — status là attribute của Order,
+%%          thường vẽ association chứ không phải dependency. Trên slide KHÔNG
+%%          highlight đường này.
+%%   NR-9   Money, PaymentInfo, List items dùng trong method nhưng không được
+%%          khai báo thành class. Cách nói tạm: "là kiểu dữ liệu hỗ trợ".
+%%   NR-7   InventoryService / PaymentService đọc dữ liệu qua Order.getLines()
+%%          và calculateTotal(), trong khi Q2 phê phán việc lộ cấu trúc nội bộ.
+%%          Cách nói tạm: "Service chỉ ĐỌC, không sửa trạng thái Order".
+%%   NR-2   Hướng điều hướng Customer → Order (xem thêm domain-model.mmd).
+%%
+%% Dependency (..>) = dùng tạm trong một thao tác (H.4)
+%% Association (-->) = quan hệ cấu trúc lâu dài (H.4)
+
+classDiagram
+    direction TB
+
+    class Customer {
+        -String customerId
+        -String name
+        -String email
+        -String address
+    }
+
+    class Order {
+        -String orderId
+        -Date orderDate
+        -OrderStatus status
+        -List~OrderLine~ lines
+        +addOrderLine(Product, int) void
+        +removeOrderLine(Product) void
+        +calculateTotal() Money
+        +markStockReserved() void
+        +markPaid() void
+        +cancel() void
+        +getLines() List~OrderLine~
+    }
+
+    class OrderLine {
+        -Product product
+        -int quantity
+        -Money unitPrice
+        +calculateSubtotal() Money
+        +increaseQuantity(int) void
+        +getProduct() Product
+        +getQuantity() int
+    }
+
+    class Product {
+        -String productId
+        -String name
+        -Money price
+        -int stockQuantity
+        +canFulfill(int) boolean
+        +decreaseStock(int) void
+        +increaseStock(int) void
+        +getPrice() Money
+    }
+
+    class OrderStatus {
+        <<enumeration>>
+        CREATED
+        STOCK_RESERVED
+        PAID
+        CANCELLED
+    }
+
+    class PaymentResult {
+        -boolean success
+        -String message
+        +isSuccess() boolean
+    }
+
+    class OrderService {
+        +placeOrder(Customer, List items) Order
+        +cancelOrder(Order) void
+    }
+
+    class InventoryService {
+        +checkStock(Order) boolean
+        +reserveStock(Order) boolean
+        +releaseStock(Order) void
+    }
+
+    class PaymentService {
+        +processPayment(Order, PaymentInfo) PaymentResult
+    }
+
+    Customer "1" --> "0..*" Order : places
+    Order "1" *-- "1..*" OrderLine : consists of
+    OrderLine "0..*" --> "1" Product : refers to
+    Order ..> OrderStatus : uses
+
+    OrderService ..> Order : creates / updates
+    OrderService ..> InventoryService : uses
+    OrderService ..> PaymentService : uses
+    InventoryService ..> Product : reads / updates stock
+    InventoryService ..> Order : reads lines
+    PaymentService ..> Order : reads total
+    PaymentService ..> PaymentResult : returns

@@ -1,0 +1,77 @@
+%% Bài 4 — Sequence: luồng placeOrder
+%% Dựng từ Bai4-Ke-hoach-thiet-ke-OOD.md mục H.3 (H.3 chỉ có text, chưa có Mermaid).
+%% 5 bước + 2 nhánh lỗi. Mục đích: chứng minh các method gọi nhau hợp lý.
+%%
+%% Bàn giao: Khang → Vọng TRƯỚC CUỐI DAY 4 (phục vụ slide S13).
+%%
+%% ⚠ NEED REVIEW liên quan (đừng tự sửa — nhóm chốt theo mục A.5):
+%%   NR-5  reserveStock trả boolean nhưng H.3 KHÔNG xử lý nhánh false.
+%%         Sơ đồ này giữ trung thành với H.3 nên cũng không vẽ nhánh đó.
+%%         Khi bị hỏi: "có khoảng hở giữa check và reserve, đây là hạn chế
+%%         và hướng cải tiến của nhóm" (kèm race condition — Q10).
+%%   NR-3  "Reserve ≠ Deduct": H.3 không nói reserveStock trừ kho bằng cách nào,
+%%         mà Product chỉ có stockQuantity / decreaseStock / increaseStock.
+%%         Sơ đồ KHÔNG vẽ decreaseStock/releaseStock chi tiết để tránh tự thêm.
+%%   NR-4  H.3 viết "cancel + trả lỗi" khi hết hàng, nhưng chưa rõ
+%%         CREATED → CANCELLED có hợp lệ không, hay đơn không được lưu.
+%%   NR-1  Bước 1 tạo Order rồi mới addOrderLine → có lúc Order 0 dòng (xem BR2).
+%%
+%% Ghi chú: các bước đánh số theo đúng H.3 (1 → 2 → 3 → 4 → 5a/5b).
+%% BR4 = snapshot giá · BR6 = all-or-nothing · BR7 = chỉ PAID khi thanh toán xong
+%% BR8 = thanh toán fail thì trả hàng đã giữ và hủy đơn · BR9 = không nhảy cóc trạng thái
+
+sequenceDiagram
+    autonumber
+    actor KH as Khách hàng
+    participant OS as OrderService
+    participant IS as InventoryService
+    participant PS as PaymentService
+    participant O as Order
+    participant P as Product
+
+    KH->>OS: placeOrder(customer, items)
+
+    Note over OS,O: 1. Tạo đơn
+    OS->>O: new Order(customer)
+    loop mỗi item
+        OS->>O: addOrderLine(product, qty)
+        O->>P: getPrice()
+        P-->>O: price
+        Note right of O: unitPrice = snapshot lúc đặt (BR4)
+    end
+
+    Note over OS,IS: 2. Kiểm kho — all-or-nothing (BR6)
+    OS->>IS: checkStock(order)
+    IS->>O: getLines()
+    O-->>IS: lines
+    IS->>P: canFulfill(qty)
+    P-->>IS: boolean
+    IS-->>OS: boolean
+
+    alt Hết hàng — checkStock trả false
+        OS->>O: cancel()
+        OS-->>KH: lỗi "hết hàng"
+    else Đủ hàng
+        Note over OS,IS: 3. Giữ hàng tạm — reserve ≠ deduct
+        OS->>IS: reserveStock(order)
+        IS-->>OS: boolean
+        OS->>O: markStockReserved()
+        Note right of O: CREATED → STOCK_RESERVED (BR9)
+
+        Note over OS,PS: 4. Thanh toán (BR7)
+        OS->>PS: processPayment(order, info)
+        PS->>O: calculateTotal()
+        O-->>PS: Money
+        PS-->>OS: PaymentResult
+
+        alt Thanh toán thành công
+            OS->>O: markPaid()
+            Note right of O: STOCK_RESERVED → PAID (BR7)
+            OS-->>KH: đơn đã xác nhận
+        else Thanh toán thất bại — 5b (BR8)
+            OS->>IS: releaseStock(order)
+            OS->>O: cancel()
+            Note right of O: → CANCELLED (BR8)
+            OS-->>KH: lỗi "thanh toán thất bại"
+        end
+    end
